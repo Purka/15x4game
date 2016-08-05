@@ -6,6 +6,7 @@ var Player = {
     volunteers_memory: 0,
 
     culture: 0,
+    culture_soft_cap: 0,
     culture_rate: 0,
 
     departments: {'smm': new Department('smm'), 'design': new Department('design'), 'site': new Department('site'), 'docs': new Department('docs')},
@@ -33,9 +34,9 @@ var Player = {
 };
 
 Player.seek = function() {
-    var inflow = 1 / ((0.1 * 0.1 * this.volunteers_memory * this.volunteers_memory * this.volunteers_memory) + 1);
+    var inflow = 1 / (0.1 * 0.01 * Math.pow(this.volunteers_memory, 4) + 1);
 
-    if (Math.floor(this.volunteers_memory + inflow) != Math.floor(this.volunteers_memory)) Gatherer.found();
+    Gatherer.found(inflow);
 
     this.volunteers += inflow;
     this.volunteers_memory += inflow;
@@ -44,10 +45,10 @@ Player.seek = function() {
 
 Player.shareKnowledge = function() {
     if (this.knowledge >= 1) {
+        Gatherer.found(1);
         this.knowledge--;
         this.volunteers++;
         this.volunteers_memory++;
-        Gatherer.found();
         message("You share knowledge and found a volunteer.");
     }
     else {
@@ -154,7 +155,7 @@ Player.getLimit = function (resource) {
     var storage_t3 = Storages.buildings.tier3[resource].level * resources_rates[resource];
     var storage_t4 = Storages.buildings.tier4[resource].level * resources_rates[resource];
 
-    return (resources_base_limits[resource] + storage_t1 + storage_t2 + storage_t3 + storage_t4) * (1 + (Civilization.buildings.sharing.level * 0.1));
+    return (resources_base_limits[resource] + storage_t1 + storage_t2 + storage_t3 + storage_t4) * (1 + (Civilization.buildings.sharing.level * 0.01));
 };
 
 Player.withdraw = function(resource, quantity, silent) {
